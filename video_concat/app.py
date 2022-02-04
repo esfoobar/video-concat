@@ -83,7 +83,7 @@ def create_video_list(file_list_path: str, sort_alpha: Boolean):
 def create_merged_file(file_list_path: str, output_video_file: str):
 
     logger.info("Generating concatenated file")
-    cmd = f"ffmpeg -f concat -safe 0 -i {file_list_path} -c copy {output_video_file}"
+    cmd = f'ffmpeg -f concat -safe 0 -i "{file_list_path}" -c copy "{output_video_file}"'
     call(cmd, shell=True)
 
 

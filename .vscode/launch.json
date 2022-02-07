@@ -16,6 +16,21 @@
       ]
     },
     {
+      "name": "Create Merged File",
+      "type": "python",
+      "request": "launch",
+      "module": "video_concat.app",
+      "args": [
+        "create-merged-file",
+        "-p",
+        "/mnt/g/My Drive/FromZero/Courses/Essential Git/Videos - Essential Git/files.txt",
+        "-o",
+        "/mnt/g/My Drive/FromZero/Courses/Essential Git/Videos - Essential Git/full_course.mp4",
+        "-c",
+        "/mnt/g/My Drive/FromZero/Courses/Essential Git/Videos - Essential Git",        
+      ]
+    },    
+    {
       "name": "Python: Test debug config",
       "type": "python",
       "request": "launch",

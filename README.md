@@ -18,12 +18,12 @@ Check out this repository, `cd` into it and then install the Poetry dependencies
 
 ## Commands
 
-To get a list of the commands, type: `poetry run python video_concat/video-concat.py`
+To get a list of the commands, type: `poetry run video_concat`
 
 ### Create concat file list
 
-To generate the list of files to be concatenated, do: `poetry run python video_concat/app.py create-concat-file -p "/path/to/file/files.txt"`
+To generate the list of files to be concatenated, do: `poetry run video_concat create-concat-file -p "/path/to/file/files.txt"`
 
 ### Generate merged video file from file list
 
-To generate the merged video from the files, do: `poetry run python video_concat/app.py create-merged-file -p "/path/to/file/files.txt" -o "/path/to/file/merged.mp4" -c "/path/to/chapters_file"`
+To generate the merged video from the files, do: `poetry run video_concat create-merged-file -p "/path/to/file/files.txt" -o "/path/to/file/merged.mp4" -c "/path/to/chapters_file"`

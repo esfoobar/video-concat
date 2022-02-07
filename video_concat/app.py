@@ -5,7 +5,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
-from utils import get_module_logger
+from .utils import get_module_logger
 
 logger = get_module_logger(__name__)
 

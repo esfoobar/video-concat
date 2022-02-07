@@ -1,11 +1,9 @@
-from email.policy import default
-from subprocess import call
+import subprocess
 import sys
-from xmlrpc.client import Boolean
 import click
 from pathlib import Path
 import os
-from subprocess import call
+from datetime import timedelta
 
 from utils import get_module_logger
 
@@ -34,7 +32,7 @@ def cli():
     default=True,
     help="Sort the files alphabetically.",
 )
-def create_video_list(file_list_path: str, sort_alpha: Boolean):
+def create_video_list(file_list_path: str, sort_alpha: bool):
     """CLI command to create a text file with the videos in that folder"""
 
     logger.info("Reading files from Path")
@@ -68,7 +66,7 @@ def create_video_list(file_list_path: str, sort_alpha: Boolean):
 
 
 @cli.command(
-    help="Generate concatenated video file",
+    help="Generate concatenated video file and the timestamp list for YouTube",
 )
 @click.option(
     "-p",
@@ -83,8 +81,56 @@ def create_video_list(file_list_path: str, sort_alpha: Boolean):
 def create_merged_file(file_list_path: str, output_video_file: str):
 
     logger.info("Generating concatenated file")
-    cmd = f'ffmpeg -f concat -safe 0 -i "{file_list_path}" -c copy "{output_video_file}"'
-    call(cmd, shell=True)
+    # cmd = f'ffmpeg -f concat -safe 0 -i "{file_list_path}" -c copy "{output_video_file}"'
+    # subprocess.call(cmd, shell=True)
+
+    # read the files list
+    file_list_path = Path(file_list_path)
+    with open(file_list_path) as f:
+        files = []
+        for line in f:
+            slashes = line.split("/")
+            file_name = slashes[len(slashes) - 1][:-2]
+            file_path = line.split("'")[1]
+
+            # get the video duration info
+            result = subprocess.run(
+                [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "format=duration",
+                    "-of",
+                    "default=noprint_wrappers=1:nokey=1",
+                    "-sexagesimal",
+                    file_path,
+                ],
+                stdout=subprocess.PIPE,
+            )
+            result_str = result.stdout.decode("utf-8")
+            period = result_str.index("\n")
+            duration = result_str[:period]
+
+            files.append({"file_name": file_name, "duration": duration})
+
+    # calculate total length
+    running_length = timedelta()
+
+    def parse_ts(ts: str) -> timedelta:
+        h, m, s = ts.split(":")
+        return timedelta(hours=int(h), minutes=int(m), seconds=float(s))
+
+    i = 0
+    for file in files:
+        breakpoint()
+        running_length += parse_ts(file["duration"])
+        running_length_string = str(running_length)
+        point = running_length_string.index(".")
+        files[i]["running_length"] = running_length_string[:point]
+        i += 1
+
+    print(files)
 
 
 if __name__ == "__main__":

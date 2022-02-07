@@ -48,7 +48,7 @@ def create_video_list(file_list_path: str, sort_alpha: bool):
 
     logger.info("Writing file list")
 
-    # open the file
+    # write the file list text file
     file_list_path = Path(file_list_path)
     f = open(file_list_path / "files.txt", "wb")
 
@@ -78,11 +78,20 @@ def create_video_list(file_list_path: str, sort_alpha: bool):
     "--output-video-file",
     help="Path to the output file.",
 )
-def create_merged_file(file_list_path: str, output_video_file: str):
+@click.option(
+    "-c",
+    "--output-chapters-path",
+    help="Path where the chapters file will be written.",
+)
+def create_merged_file(
+    file_list_path: str, output_video_file: str, output_chapters_path: str
+):
 
     logger.info("Generating concatenated file")
-    # cmd = f'ffmpeg -f concat -safe 0 -i "{file_list_path}" -c copy "{output_video_file}"'
-    # subprocess.call(cmd, shell=True)
+    cmd = f'ffmpeg -f concat -safe 0 -i "{file_list_path}" -c copy "{output_video_file}"'
+    subprocess.call(cmd, shell=True)
+
+    logger.info("Generating chapters metadata")
 
     # read the files list
     file_list_path = Path(file_list_path)
@@ -90,7 +99,13 @@ def create_merged_file(file_list_path: str, output_video_file: str):
         files = []
         for line in f:
             slashes = line.split("/")
-            file_name = slashes[len(slashes) - 1][:-2]
+            file_name_raw = slashes[len(slashes) - 1][:-2]
+            if "_" and ".mp4" in file_name_raw:
+                underscore_index = file_name_raw.index("_")
+                mp4_index = file_name_raw.index(".mp4")
+                file_name_raw = file_name_raw[underscore_index + 1 : mp4_index]
+                file_name = file_name_raw.replace("_", " ")
+
             file_path = line.split("'")[1]
 
             # get the video duration info
@@ -123,14 +138,33 @@ def create_merged_file(file_list_path: str, output_video_file: str):
 
     i = 0
     for file in files:
-        breakpoint()
         running_length += parse_ts(file["duration"])
         running_length_string = str(running_length)
-        point = running_length_string.index(".")
+        if "." in running_length_string:
+            point = running_length_string.index(".")
+        else:
+            point = len(running_length_string)
         files[i]["running_length"] = running_length_string[:point]
         i += 1
 
-    print(files)
+    logger.info("Writing chapters file")
+
+    # write the chapters file
+    file_list_path = Path(file_list_path)
+    f = open(Path(output_chapters_path) / "chapters.txt", "wb")
+
+    contents = "Chapters\n===\n\n"
+    start_point = "0:00:00"
+    start_index = 1
+
+    for file in files:
+        contents += f'{start_point} {file["file_name"]}\n'
+        if start_index < len(files):
+            start_point = files[start_index]["running_length"]
+            start_index += 1
+
+    f.write(contents.encode())
+    f.close()
 
 
 if __name__ == "__main__":

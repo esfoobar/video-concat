@@ -155,7 +155,7 @@ def create_merged_file(
 
     contents = "Chapters\n===\n\n"
     start_point = "0:00:00"
-    start_index = 1
+    start_index = 0
 
     for file in files:
         contents += f'{start_point} {file["file_name"]}\n'
